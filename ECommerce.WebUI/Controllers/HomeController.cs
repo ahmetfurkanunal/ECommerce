@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ECommerce.Core.Entities;
 using ECommerce.Data;
+using ECommerce.Service.Abstract;
 using ECommerce.WebUI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,20 +10,33 @@ namespace ECommerce.WebUI.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly DatabaseContext _context;
+        //private readonly DatabaseContext _context;
 
-        public HomeController(DatabaseContext context)
+        //public HomeController(DatabaseContext context)
+        //{
+        //    _context = context;
+        //}
+
+        private readonly IService<Product> _serviceProduct;
+        private readonly IService<Slider> _serviceSlider;
+       
+        private readonly IService<Contact> _serviceContact;
+
+        public HomeController(IService<Product> serviceProduct, IService<Slider> serviceSlider,  IService<Contact> serviceContact)
         {
-            _context = context;
+            _serviceProduct = serviceProduct;
+            _serviceSlider = serviceSlider;
+            
+            _serviceContact = serviceContact;
         }
 
         public async Task<IActionResult> Index()
         {
             var model = new HomePageViewModel()
             {
-                Sliders = await _context.Slider.ToListAsync(),
-                News = await _context.News.ToListAsync(),
-                Products = await _context.Products.Where(p => p.IsActive && p.IsHome).ToListAsync(),
+                Sliders = await _serviceSlider.GetAllAsync(),
+               
+                Products = await _serviceProduct.GetAllAsync(p => p.IsActive && p.IsHome)
 
             };
             return View(model);
@@ -50,8 +64,8 @@ namespace ECommerce.WebUI.Controllers
             {
                 try
                 {
-                    _context.Contacts.Add(contact);
-                    var sonuc = _context.SaveChanges();
+                    _serviceContact.Add(contact);
+                    var sonuc = _serviceContact.SaveChanges(); 
                     if (sonuc > 0) {
                         TempData["Message"] = "<div class='alert alert-success'>The message sent.</div>";
                         return RedirectToAction("ContactUs");

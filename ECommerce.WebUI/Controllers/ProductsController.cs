@@ -1,4 +1,6 @@
-﻿using ECommerce.Data;
+﻿using ECommerce.Core.Entities;
+using ECommerce.Data;
+using ECommerce.Service.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,16 +8,23 @@ namespace ECommerce.WebUI.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly DatabaseContext _context;
+        //private readonly DatabaseContext _context;
 
-        public ProductsController(DatabaseContext context)
+        //public ProductsController(DatabaseContext context)
+        //{
+        //    _context = context;
+        //}
+
+        private readonly IService<Product> _serviceProduct;
+
+        public ProductsController(IService<Product> serviceProduct)
         {
-            _context = context;
+            _serviceProduct = serviceProduct;
         }
         public async Task<IActionResult> Index(string q = "")
         {
-            var databaseContext = _context.Products.Where(p => p.IsActive && p.Name.Contains(q)).Include(p => p.Brand).Include(p => p.Category);
-            return View(await databaseContext.ToListAsync());
+            var databaseContext = _serviceProduct.GetAllAsync(p => p.IsActive && p.Name.Contains(q) || p.Description.Contains(q));
+            return View(await databaseContext);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -25,7 +34,7 @@ namespace ECommerce.WebUI.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            var product = await _serviceProduct.GetQueryable()
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -37,7 +46,7 @@ namespace ECommerce.WebUI.Controllers
             var model = new ProductDetailsViewModel()
             {
                 Product = product,
-                RelatedProducts = _context.Products.Where(p => p.IsActive && p.CategoryId == product.CategoryId && p.Id != product.Id)
+                RelatedProducts = _serviceProduct.GetQueryable().Where(p => p.IsActive && p.CategoryId == product.CategoryId && p.Id != product.Id)
             };
             return View(model);
         }

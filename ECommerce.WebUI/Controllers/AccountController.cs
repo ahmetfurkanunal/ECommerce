@@ -1,5 +1,6 @@
 ﻿using ECommerce.Core.Entities;
 using ECommerce.Data;
+using ECommerce.Service.Abstract;
 using ECommerce.WebUI.Models;
 using Microsoft.AspNetCore.Authentication;//login
 using Microsoft.AspNetCore.Authorization;//login
@@ -9,20 +10,81 @@ using System.Security.Claims; //login
 
 namespace ECommerce.WebUI.Controllers
 {
-    public class AccountController : Controller
+    public class Accountcontroller : Controller
     {
-        private readonly DatabaseContext _context;
+    //    private readonly DatabaseContext _context;
 
-        public AccountController(DatabaseContext context)
+    //    public AccountController(DatabaseContext context)
+    //    {
+
+
+    //        _context = context;
+    //    }
+
+    private readonly IService<AppUser> _service;
+        
+        public Accountcontroller(IService<AppUser> service)
         {
-            _context = context;
+            _service = service;
         }
-  
         [Authorize]
-        public IActionResult Index()
+        public  async Task<IActionResult> IndexAsync()
         {
-            return View();
+            AppUser user = await _service.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var model = new UserEditViewModel()
+            {
+                Email = user.Email,
+                Id = user.Id,
+                Name = user.Name,
+                Password = user.Password,
+                Phone = user.Phone,
+                Surname = user.Surname, 
+            };
+            return View(model);
         }
+
+
+
+        [HttpPost,Authorize]
+        public async Task<IActionResult> IndexAsync(UserEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+                try
+                {
+                    AppUser user = await _service.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
+                    if (user is not null)
+                    {
+                        user.Surname = model.Surname;
+                        user.Phone = model.Phone;
+                        user.Name = model.Name;
+                        user.Password = model.Password;
+                        user.Email = model.Email;
+                        _service.Update(user);
+                        var sonuc = _service.SaveChanges();
+                        if (sonuc > 0)
+                        {
+                            TempData["Message"] = "<div class='alert alert-success'>Your info is updated.</div>";
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+
+                catch (Exception)
+                {
+                    ModelState.AddModelError("", "Hata Oluştu!.");
+                }
+
+               
+            }
+            return View(model);
+        }
+
 
         public IActionResult SıgnIn()
         {
@@ -36,7 +98,7 @@ namespace ECommerce.WebUI.Controllers
             {
                 try
                 {
-                    var account = await _context.AppUsers.FirstOrDefaultAsync(x => x.Email == loginViewModel.Email & x.Password == loginViewModel.Password & x.IsActive);
+                    var account = await _service.GetAsync(x => x.Email == loginViewModel.Email & x.Password == loginViewModel.Password & x.IsActive);
                     if (account == null)
                     {
                         ModelState.AddModelError("", "Giriş Başarısız");
@@ -79,9 +141,9 @@ namespace ECommerce.WebUI.Controllers
             appUser.IsActive = true;
             if (ModelState.IsValid)
             {
-                await  _context.AddAsync(appUser);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await  _service.AddAsync(appUser);
+                await _service.SaveChangesAsync();
+                return RedirectToAction(nameof(IndexAsync));
             }
             return View(appUser);
         }

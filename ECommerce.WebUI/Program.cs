@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
+using ECommerce.Service.Abstract;
+using ECommerce.Service.Concrete;
 
 namespace ECommerce.WebUI
 {
@@ -27,6 +29,8 @@ namespace ECommerce.WebUI
             builder.Services.AddDistributedMemoryCache();
 
             builder.Services.AddDbContext<DatabaseContext>();
+
+            builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(x =>

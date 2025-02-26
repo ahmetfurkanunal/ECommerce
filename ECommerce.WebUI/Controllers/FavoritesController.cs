@@ -1,5 +1,5 @@
 ﻿using ECommerce.Core.Entities;
-using ECommerce.Data;
+using ECommerce.Service.Abstract;
 using ECommerce.WebUI.ExtensionMethods;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +8,18 @@ namespace ECommerce.WebUI.Controllers
     public class FavoritesController : Controller
     {
 
-        private readonly DatabaseContext _context;
+        //private readonly DatabaseContext _context;
 
-        public FavoritesController(DatabaseContext context)
+        //public FavoritesController(DatabaseContext context)
+        //{
+        //    _context = context;
+        //}
+
+        private readonly IService<Product> _service;
+
+        public FavoritesController(IService<Product> service)
         {
-            _context = context;
+            _service = service;
         }
         public IActionResult Index()
         {
@@ -28,7 +35,7 @@ namespace ECommerce.WebUI.Controllers
         public IActionResult Add(int ProductId)
         {
             var favorites = GetFavorites();
-            var product = _context.Products.Find(ProductId);
+            var product = _service.Find(ProductId);
             if (product != null && !favorites.Any(p => p.Id == ProductId))
             {
                 favorites.Add(product);
@@ -43,7 +50,7 @@ namespace ECommerce.WebUI.Controllers
         public IActionResult Remove(int ProductId)
         {
             var favorites = GetFavorites();
-            var product = _context.Products.Find(ProductId);
+            var product = _service.Find(ProductId);
             if (product != null && favorites.Any(p => p.Id == ProductId))
             {
                 favorites.RemoveAll(i => i.Id == product.Id);
