@@ -22,8 +22,11 @@ namespace ECommerce.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-IVRLLUL; Database=ECommerceDb2; Trusted_Connection=True; TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(@"Server=DESKTOP-VQ54LT9\SQLEXPRESS; Database=ECommerceDb2; Trusted_Connection=True; TrustServerCertificate=True;");
             base.OnConfiguring(optionsBuilder);
+            //DESKTOP-VQ54LT9\SQLEXPRESS
+
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
