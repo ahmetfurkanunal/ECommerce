@@ -3,6 +3,7 @@ using ECommerce.Service.Abstract;
 using ECommerce.Service.Concrete;
 using ECommerce.WebUI.ExtensionMethods;
 using ECommerce.WebUI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.WebUI.Controllers
@@ -63,7 +64,18 @@ namespace ECommerce.WebUI.Controllers
             }
             return RedirectToAction("Index");
         }
+        [Authorize]
+        public IActionResult Checkout()
+        {
+            var cart = GetCart();
+            var model = new CheckoutViewModel()
+            {
+                CartProducts = cart.CartLines,
+                TotalPrice = cart.TotalPrice()
+            };
 
+            return View(model);
+        }
         private CartService GetCart()
         {
             return HttpContext.Session.GetJson<CartService>("Cart") ?? new CartService();
