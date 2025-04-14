@@ -10,9 +10,10 @@
         <h1 class="display-4">Buy</h1>
     </div>
 
-    <div class="row">
+    
         @if (Model.CartProducts.Any())
         {
+        <div class="row">
             <div class="col-md-8">
                 <div class="table-responsive">
 
@@ -57,7 +58,6 @@
 
                 </div>
             </div>
-
             <div class="col-md-4">
                 <div>
                     <h4>Sipariş Özeti</h4>
@@ -83,6 +83,58 @@
                     </tr>
                 </table>
             </div>
+        </div>
+        <hr />
+        @if (Model.Adresses is null)
+        {
+            <div class="alert alert-secondary my-5">
+                <h5 class="text-danger">
+                    Kayıtlı Adresiniz Yok!
+                </h5>
+                <h6>
+                    Sipariş verebilmek için en az 1 adres eklemelisiniz!
+                </h6>
+                <a href="/MyAdresses" class="btn btn-danger">
+                    <i class=" bi-person-plus me-1"></i>
+                    Adres Ekle
+                </a>
+            </div>
+        }
+        <form asp-action="Checkout">
+            <div class="my-5">
+                <h3>Teslimat Adresi</h3>
+                <div class="row row-cols-3">
+                    @foreach (var item in Model.Adresses)
+                    {
+                        <div class="col d-flex">
+                            <div class="card w-100 h-100">
+                                <div class="card-header">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            @Html.RadioButtonFor(model => model.Addresses, item.AdressGuid, new { @class = "form-check-input" })
+                                            @item.Title
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <p>
+                                        @item.OpenAdress @item.District @item.City
+                                    </p>
+                                    <div class="form-check mt-auto">
+                                        <label class="form-check-label">
+                                            <input type="radio" name="BillingAdress" value="@item.AdressGuid" />
+                                            Invoice Adress
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </form>
+
+
         }
         else
         {
@@ -93,6 +145,6 @@
             </div>
         }
 
-    </div>
+ 
 
 </section>

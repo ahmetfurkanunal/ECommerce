@@ -69,7 +69,7 @@ namespace ECommerce.WebUI
             app.UseSession(); // session kullan
             app.UseAuthentication(); // önce oturum açma
             app.UseAuthorization(); //sonra yetkilendirme
-
+      
             app.MapControllerRoute(
                         name: "admin",
                         pattern: "{area:exists}/{controller=Main}/{action=Index}/{id?}");

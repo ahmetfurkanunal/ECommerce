@@ -1,4 +1,4 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
 namespace ECommerce.Core.Entities
 {
     public class AppUser : IEntity
@@ -9,6 +9,7 @@ namespace ECommerce.Core.Entities
         public string Email { get; set; }
         public string? Phone { get; set; }
         public string Password { get; set; }
+        [DataType(DataType.Password)]
         public string? UserName { get; set; } 
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
@@ -16,5 +17,6 @@ namespace ECommerce.Core.Entities
 
         public Guid UserGuid { get; set; } = Guid.NewGuid();
 
+        public List<Adress?> Adresses { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace ECommerce.WebUI.Controllers
             _service = service;
         }
         [Authorize]
-        public  async Task<IActionResult> IndexAsync()
+        public  async Task<IActionResult> Index()
         {
             AppUser user = await _service.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
             if (user == null)
@@ -129,24 +129,25 @@ namespace ECommerce.WebUI.Controllers
         }
 
        
-        public IActionResult SıgnUp()
+        public IActionResult SignUp()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> SıgnUpAsync(AppUser appUser)
+        public async Task<IActionResult> SignUpAsync(AppUser appUser)
         {
             appUser.IsAdmin = false;
             appUser.IsActive = true;
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await  _service.AddAsync(appUser);
+                await _service.AddAsync(appUser);
                 await _service.SaveChangesAsync();
-                return RedirectToAction(nameof(IndexAsync));
+                return RedirectToAction("Index");
             }
             return View(appUser);
         }
+        
 
         public async Task<IActionResult> SıgnOutAsync()
         {

@@ -10,11 +10,17 @@ namespace ECommerce.WebUI.Controllers
 {
     public class CartController : Controller
     {
+        private readonly IService<AppUser> _serviceAppUser;
         private readonly IService<Product> _serviceProduct;
+        private readonly IService<Adress> _serviceAdress;
 
-        public CartController(IService<Product> serviceProduct)
+
+
+        public CartController(IService<Product> serviceProduct, IService<Adress> serviceAdress, IService<AppUser> serviceAppUser)
         {
             _serviceProduct = serviceProduct;
+            _serviceAdress = serviceAdress;
+            _serviceAppUser = serviceAppUser;
         }
         public IActionResult Index()
         {
@@ -65,17 +71,26 @@ namespace ECommerce.WebUI.Controllers
             return RedirectToAction("Index");
         }
         [Authorize]
-        public IActionResult Checkout()
+        public async Task<IActionResult> CheckoutAsync()
         {
             var cart = GetCart();
+            var appUser = await _serviceAppUser.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
+            if (appUser == null)
+            {
+                return RedirectToAction("SignIn", "Account");
+            }
+
+            var addresses = await _serviceAdress.GetAllAsync(a => a.AppUserId == appUser.Id && a.IsActive);
             var model = new CheckoutViewModel()
             {
                 CartProducts = cart.CartLines,
-                TotalPrice = cart.TotalPrice()
+                TotalPrice = cart.TotalPrice(),
+                Adresses = addresses
             };
 
             return View(model);
         }
+
         private CartService GetCart()
         {
             return HttpContext.Session.GetJson<CartService>("Cart") ?? new CartService();
