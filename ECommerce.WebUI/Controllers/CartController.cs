@@ -96,12 +96,14 @@ namespace ECommerce.WebUI.Controllers
         }
 
         [Authorize, HttpPost]
-        public async Task<IActionResult> Checkout(string CardNumber, string CardMonth, string CardYear, string CVV, string Adresses, string BillingAdress)
+        public async Task<IActionResult> Checkout(string CardNumber, string CardMonth, string CardYear, string CVV, string DeliveryAdress, string BillingAdress)
         {
             var cart = GetCart();
             var appUser = await _serviceAppUser.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
             if (appUser == null)
+            {
                 return RedirectToAction("SignIn", "Account");
+            }
 
             var addresses = await _serviceAdress.GetAllAsync(a => a.AppUserId == appUser.Id && a.IsActive);
             var model = new CheckoutViewModel()
@@ -110,58 +112,59 @@ namespace ECommerce.WebUI.Controllers
                 TotalPrice = cart.TotalPrice(),
                 Adresses = addresses
             };
-
             if (string.IsNullOrWhiteSpace(CardNumber) || string.IsNullOrWhiteSpace(CardMonth) ||
                 string.IsNullOrWhiteSpace(CardYear) || string.IsNullOrWhiteSpace(CVV) ||
-                string.IsNullOrWhiteSpace(Adresses) || string.IsNullOrWhiteSpace(BillingAdress))
+                string.IsNullOrWhiteSpace(DeliveryAdress) || string.IsNullOrWhiteSpace(BillingAdress))
+            {
                 return View(model);
+            }
 
-            var teslimatAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == Adresses);
+            var teslimatAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == DeliveryAdress);
             var faturaAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == BillingAdress);
 
-            // ✅ Sipariş oluşturma
-            Console.WriteLine("🚨 CHECKOUT POST BAŞLADI");
+            //Ödeme çekme 
+            var siparis = new Order
+            {
+                AppUserId = appUser.Id,
+                BillingAddress = BillingAdress,
+                CustomerId = appUser.UserGuid.ToString(),
+                DeliveryAddress = DeliveryAdress,
+                OrderDate = DateTime.Now,
+                TotalPrice = cart.TotalPrice(),
+                OrderNumber = Guid.NewGuid().ToString(),
+                OrderLines = []
+            };
+
+            foreach (var item in cart.CartLines)
+            {
+                siparis.OrderLines.Add(new OrderLine
+                {
+                    ProductId = item.Product.Id,
+                    OrderId = siparis.Id,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.Product.Price
+                });
+            }
 
             try
             {
-                Console.WriteLine("_serviceOrder null mu? " + (_serviceOrder == null));
-                Console.WriteLine("cart null mu? " + (cart == null));
-                Console.WriteLine("appUser null mu? " + (appUser == null));
-
-                var siparis = new Order
-                {
-                    AppUserId = appUser.Id,
-                    BillingAddress = "deneme",
-                    DeliveryAddress = "deneme",
-                    CustomerId = appUser.UserGuid.ToString(),
-                    OrderDate = DateTime.Now,
-                    TotalPrice = cart.TotalPrice(),
-                    OrderNumber = Guid.NewGuid().ToString(),
-                    OrderLines = new List<OrderLine>
-        {
-            new OrderLine
-            {
-                ProductId = 1,
-                Quantity = 1,
-                UnitPrice = 10
-            }
-        }
-                };
-
                 await _serviceOrder.AddAsync(siparis);
                 var sonuc = await _serviceOrder.SaveChangesAsync();
-
-                Console.WriteLine("✅ Save sonucu: " + sonuc);
-                HttpContext.Session.Remove("Cart");
-                return RedirectToAction("Thanks");
+                if (sonuc > 0)
+                {
+                    HttpContext.Session.Remove("Cart");
+                    return RedirectToAction("Thanks");
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("❌ HATA: " + ex.Message);
-                Console.WriteLine("❌ STACK: " + ex.StackTrace);
-                return View();
+                TempData["Message"] = "Hata Oluştu";
             }
+
+            return View(model);
         }
+
+        
 
 
 
