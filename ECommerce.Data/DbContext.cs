@@ -17,8 +17,8 @@ namespace ECommerce.Data
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Slider> Slider { get; set; }
-        public DbSet<Slider> Orders { get; set; }
-        public DbSet<Slider> OrderLines { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

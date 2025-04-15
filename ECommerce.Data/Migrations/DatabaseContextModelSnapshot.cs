@@ -128,14 +128,14 @@ namespace ECommerce.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2025, 4, 14, 23, 24, 41, 853, DateTimeKind.Local).AddTicks(6311),
+                            CreateDate = new DateTime(2025, 4, 15, 16, 43, 2, 658, DateTimeKind.Local).AddTicks(432),
                             Email = "admin@ecommerce.net",
                             IsActive = true,
                             IsAdmin = true,
                             Name = "admin",
                             Password = "123456",
                             Surname = "admin",
-                            UserGuid = new Guid("0bcd2225-dff3-496c-98fd-3b71ad2afdfc"),
+                            UserGuid = new Guid("40dca603-d213-4847-ac2c-566a2a61f8b4"),
                             UserName = "Admin"
                         });
                 });
@@ -217,7 +217,7 @@ namespace ECommerce.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2025, 4, 14, 23, 24, 41, 857, DateTimeKind.Local).AddTicks(640),
+                            CreateDate = new DateTime(2025, 4, 15, 16, 43, 2, 660, DateTimeKind.Local).AddTicks(3710),
                             IsActive = true,
                             IsTopMenu = true,
                             Name = "Elektronik",
@@ -227,7 +227,7 @@ namespace ECommerce.Data.Migrations
                         new
                         {
                             Id = 2,
-                            CreateDate = new DateTime(2025, 4, 14, 23, 24, 41, 857, DateTimeKind.Local).AddTicks(2192),
+                            CreateDate = new DateTime(2025, 4, 15, 16, 43, 2, 660, DateTimeKind.Local).AddTicks(4555),
                             IsActive = true,
                             IsTopMenu = true,
                             Name = "Bilgisayar",
@@ -307,6 +307,77 @@ namespace ECommerce.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("News");
+                });
+
+            modelBuilder.Entity("ECommerce.Core.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BillingAddress")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DeliveryAddress")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("ECommerce.Core.Entities.OrderLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderLines");
                 });
 
             modelBuilder.Entity("ECommerce.Core.Entities.Product", b =>
@@ -405,6 +476,25 @@ namespace ECommerce.Data.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("ECommerce.Core.Entities.OrderLine", b =>
+                {
+                    b.HasOne("ECommerce.Core.Entities.Order", "Order")
+                        .WithMany("OrderLines")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ECommerce.Core.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("ECommerce.Core.Entities.Product", b =>
                 {
                     b.HasOne("ECommerce.Core.Entities.Brand", "Brand")
@@ -428,6 +518,11 @@ namespace ECommerce.Data.Migrations
             modelBuilder.Entity("ECommerce.Core.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ECommerce.Core.Entities.Order", b =>
+                {
+                    b.Navigation("OrderLines");
                 });
 #pragma warning restore 612, 618
         }
