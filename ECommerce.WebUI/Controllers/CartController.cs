@@ -135,7 +135,7 @@ namespace ECommerce.WebUI.Controllers
                 OrderLines = []
             };
 
-            foreach (var item in cart.CartLines)
+            foreach (var item in cart.CartLines) 
             {
                 siparis.OrderLines.Add(new OrderLine
                 {
