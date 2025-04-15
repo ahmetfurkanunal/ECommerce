@@ -100,7 +100,7 @@
                 </a>
             </div>
         }
-        <form asp-action="Checkout">
+        <form asp-action="Checkout" method="post">
             <div class="my-5">
                 <h3>Teslimat Adresi</h3>
                 <div class="row row-cols-3">
@@ -111,7 +111,7 @@
                                 <div class="card-header">
                                     <div class="form-check">
                                         <label class="form-check-label">
-                                            @Html.RadioButtonFor(model => model.Addresses, item.AdressGuid, new { @class = "form-check-input" })
+                                            <input class ="form-check-input" type="radio" name="DeliveryAdress" value="@item.AdressGuid" @(item.IsDeliveryAdress ? "checked" : "") />
                                             @item.Title
                                         </label>
                                     </div>
@@ -122,7 +122,7 @@
                                     </p>
                                     <div class="form-check mt-auto">
                                         <label class="form-check-label">
-                                            <input type="radio" name="BillingAdress" value="@item.AdressGuid" />
+                                            <input class="form-check-input" type="radio" name="BillingAdress" value="@item.AdressGuid" @(item.IsBillingAdress ? "checked" : "") />
                                             Invoice Adress
                                         </label>
                                     </div>
@@ -132,6 +132,59 @@
                     }
                 </div>
             </div>
+            <div class="my-5">
+                <h2>Ödeme Seçenekleri</h2>
+                <h3>Kart İle Öde</h3>
+                <h6>Banka veya Kredi Kartı kullanarak ödeme yapabilirsiniz.</h6>
+                <h6>Kart Bilgileri</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Kart Numarası</label>
+                        <input type="number" name="CardNumber" class="form-control" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <label>Son Kullanma Tarihi</label>
+                    <div class="col-md-2">
+                        <select class="form-select" name="CardMonth" required>
+                            <option disabled value="">Ay</option>
+                            <option value="1">01</option>
+                            <option value="2">02</option>
+                            <option value="3">03</option>
+                            <option value="4">04</option>
+                            <option value="5">05</option>
+                            <option value="6">06</option>
+                            <option value="7">07</option>
+                            <option value="8">08</option>
+                            <option value="9">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select"  name="CardYear" required>
+                            <option disabled value="">Yıl</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>CVV</label>
+                            <input type="number" name="CVV" class="form-control" required />
+                        </div>
+                    </div>
+
+                </div>
+                <button  type="submit" class="btn btn-success mt-2">Buy</button>
+            </div>
+
         </form>
 
 
