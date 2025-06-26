@@ -119,19 +119,21 @@ namespace ECommerce.WebUI.Controllers
                 return View(model);
             }
 
-            var teslimatAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == DeliveryAdress);
             var faturaAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == BillingAdress);
+            var teslimatAdresi = addresses.FirstOrDefault(a => a.AdressGuid.ToString() == DeliveryAdress);
+       
 
             //Ödeme çekme 
             var siparis = new Order
             {
                 AppUserId = appUser.Id,
-                BillingAddress = BillingAdress,
-                CustomerId = appUser.UserGuid.ToString(),
-                DeliveryAddress = DeliveryAdress,
+                BillingAddress =BillingAdress,                            
+                DeliveryAddress =DeliveryAdress,
+                CustomerId = appUser.UserGuid.ToString(),               
                 OrderDate = DateTime.Now,
                 TotalPrice = cart.TotalPrice(),
                 OrderNumber = Guid.NewGuid().ToString(),
+                OrderState = 0,
                 OrderLines = []
             };
 

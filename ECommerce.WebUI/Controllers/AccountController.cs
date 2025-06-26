@@ -22,10 +22,12 @@ namespace ECommerce.WebUI.Controllers
     //    }
 
     private readonly IService<AppUser> _service;
-        
-        public Accountcontroller(IService<AppUser> service)
+    private readonly IService<Order> _serviceOrder;
+
+        public Accountcontroller(IService<AppUser> service, IService<Order> serviceOrder)
         {
             _service = service;
+            _serviceOrder = serviceOrder;
         }
         [Authorize]
         public  async Task<IActionResult> Index()
@@ -86,10 +88,30 @@ namespace ECommerce.WebUI.Controllers
         }
 
 
+
+
+
+        [Authorize]
+        public async Task<IActionResult> MyOrders()
+        {
+            AppUser user = await _service.GetAsync(x => x.UserGuid.ToString() == HttpContext.User.FindFirst("UserGuid").Value);
+            if (user is null)
+            {
+
+                await HttpContext.SignOutAsync();
+                return RedirectToAction("SıgnIn");
+            }
+            var model = _serviceOrder.GetQueryable().Where(s => s.AppUserId == user.Id).Include(o => o.OrderLines).ThenInclude(p => p.Product);
+            return View(model);
+        }
+
+
         public IActionResult SıgnIn()
         {
             return View();
         }
+ 
+    
 
         [HttpPost]
         public async Task<IActionResult> SıgnInAsync(LoginViewModel loginViewModel)
